@@ -6,12 +6,21 @@
 
 declare(strict_types=1);
 
-// Configuration constants
-define('DB_HOST', 'localhost');
-define('DB_PORT', '3306');
-define('DB_NAME', 'restaurant_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Configuration constants (Supports cloud environment variables or defaults to local XAMPP)
+if ($dbUrl = (getenv('DATABASE_URL') ?: getenv('MYSQL_URL'))) {
+    $parsed = parse_url($dbUrl);
+    define('DB_HOST', $parsed['host'] ?? 'localhost');
+    define('DB_PORT', (string)($parsed['port'] ?? '3306'));
+    define('DB_USER', $parsed['user'] ?? 'root');
+    define('DB_PASS', $parsed['pass'] ?? '');
+    define('DB_NAME', ltrim($parsed['path'] ?? 'restaurant_db', '/'));
+} else {
+    define('DB_HOST', getenv('DB_HOST') ?: (getenv('MYSQLHOST') ?: 'localhost'));
+    define('DB_PORT', (string)(getenv('DB_PORT') ?: (getenv('MYSQLPORT') ?: '3306')));
+    define('DB_NAME', getenv('DB_NAME') ?: (getenv('MYSQLDATABASE') ?: 'restaurant_db'));
+    define('DB_USER', getenv('DB_USER') ?: (getenv('MYSQLUSER') ?: 'root'));
+    define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : ''));
+}
 define('DB_CHARSET', 'utf8mb4');
 
 // Base URL helper
