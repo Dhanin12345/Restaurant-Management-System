@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Pro &mdash; Enterprise Culinary & POS Ecosystem</title>
+    <meta name="description" content="Next-Generation Restaurant Management System with Real-Time Kitchen Display, Recipe Bill-of-Materials Deduction and Smart Table Allocation.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom SaaS Design System -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .hero-banner {
+            background: linear-gradient(180deg, rgba(11, 15, 25, 0.7) 0%, #0b0f19 100%),
+                        radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.18) 0%, transparent 60%);
+            padding: 4.5rem 1.5rem 3rem 1.5rem;
+            text-align: center;
+        }
+        .portal-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 1.5rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            cursor: pointer;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 25px -5px rgba(249, 115, 22, 0.25);
+        }
+        .floating-cart-trigger {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 1040;
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
+        }
+        .role-chip-btn {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .role-chip-btn:hover, .role-chip-btn.active {
+            background: #f97316;
+            color: #ffffff;
+            border-color: #f97316;
+            box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Quick Demo Switcher Bar -->
+<div class="role-switcher-banner">
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-warning text-dark"><i class="fa-solid fa-bolt me-1"></i> Quick Role Switcher</span>
+        <span class="d-none d-md-inline text-light opacity-75">Explore role workstations & workflows:</span>
+    </div>
+    <div class="role-chips">
+        <button class="role-chip-btn" onclick="openRoleModal('admin')"><i class="fa-solid fa-crown me-1"></i> Admin</button>
+        <button class="role-chip-btn" onclick="openRoleModal('manager')"><i class="fa-solid fa-user-tie me-1"></i> Manager</button>
+        <button class="role-chip-btn" onclick="openRoleModal('waiter')"><i class="fa-solid fa-utensils me-1"></i> Waiter</button>
+        <button class="role-chip-btn" onclick="openRoleModal('kitchen')"><i class="fa-solid fa-fire-burner me-1"></i> Kitchen</button>
+        <button class="role-chip-btn" onclick="openRoleModal('cashier')"><i class="fa-solid fa-cash-register me-1"></i> Cashier</button>
+        <button class="role-chip-btn active" onclick="openRoleModal('customer')"><i class="fa-solid fa-user me-1"></i> Customer</button>
+    </div>
+</div>
+
+<!-- Global Top Navbar -->
+<nav class="navbar navbar-expand-lg border-bottom border-secondary border-opacity-25 sticky-top" style="background: rgba(11, 15, 25, 0.92); backdrop-filter: blur(16px);">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="#top">
+            <div class="brand-icon" style="width: 38px; height: 38px; font-size: 1.15rem;">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <span class="d-flex align-items-center gap-2">RESTAURANT <span class="brand-highlight">PRO</span></span>
+        </a>
+        <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
+                <li class="nav-item"><a class="nav-link text-light fw-semibold" href="#menuSection"><i class="fa-solid fa-book-open me-1 text-primary"></i> Digital Menu</a></li>
+                <li class="nav-item"><a class="nav-link text-light fw-semibold" href="#reservationSection"><i class="fa-regular fa-calendar-check me-1 text-warning"></i> Table Reservation</a></li>
+                <li class="nav-item"><a class="nav-link text-light fw-semibold" href="#rolesSection"><i class="fa-solid fa-users-gear me-1 text-info"></i> Staff Portals</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-warning d-flex align-items-center gap-2 py-2 px-3 fw-bold" type="button" data-bs-toggle="modal" data-bs-target="#workflowPlayerModal">
+                    <i class="fa-solid fa-play-circle text-warning fa-lg"></i>
+                    <span>Flow Player</span>
+                </button>
+                <button class="btn btn-primary-saas btn-sm py-2 px-3 fw-bold position-relative" data-bs-toggle="modal" data-bs-target="#cartModal">
+                    <i class="fa-solid fa-cart-shopping me-1"></i> Check (<span id="navCartCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-banner" id="top">
+    <div class="container" style="max-width: 920px;">
+        <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-bold mb-3">
+            <i class="fa-solid fa-bolt me-1"></i> Next-Level Enterprise Restaurant System
+        </span>
+        <h1 class="display-4 fw-extrabold text-white mb-3" style="font-weight: 800; letter-spacing: -0.03em;">
+            Precision Dining, Live Kitchen Flow & Automated Recipe Inventory
+        </h1>
+        <p class="lead text-muted mb-4">
+            An enterprise-grade web platform engineered with PHP 8, MariaDB/MySQL, and REST APIs. Features zero-refresh Kitchen Display (KDS), automated recipe portion stock deduction, and AI smart table allocation.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="#menuSection" class="btn btn-primary-saas px-4 py-3 fs-6 fw-bold">
+                <i class="fa-solid fa-utensils me-2"></i> Explore Digital Menu
+            </a>
+            <a href="#reservationSection" class="btn btn-secondary-saas px-4 py-3 fs-6 fw-bold">
+                <i class="fa-regular fa-calendar-plus me-2"></i> Book VIP Table
+            </a>
+            <button type="button" class="btn btn-warning-saas px-4 py-3 fs-6 fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#workflowPlayerModal">
+                <i class="fa-solid fa-play-circle me-2"></i> Play Step-by-Step Flow
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Table Reservation Section with Smart Seating Engine -->
+<section class="py-5" id="reservationSection" style="background: rgba(17, 24, 39, 0.4);">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Left: Booking Form -->
+            <div class="col-lg-6">
+                <div class="saas-card p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-primary text-white mb-2"><i class="fa-solid fa-sparkles me-1"></i> VIP Dining Seating</span>
+                            <h2 class="h4 fw-bold text-white mb-1">Book Your Table Online</h2>
+                            <p class="text-muted small mb-0">Smart allocation automatically pairs your party with the best available table.</p>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-warning text-nowrap fw-bold" data-bs-toggle="modal" data-bs-target="#workflowPlayerModal">
+                            <i class="fa-solid fa-play-circle me-1"></i> Play Flow
+                        </button>
+                    </div>
+
+                    <!-- Visual Step-by-Step Data Flow Pipeline -->
+                    <div class="step-pipeline-nav" id="resPipelineNav">
+                        <div class="step-pipeline-line-fill" id="resPipelineFill" style="width: 25%;"></div>
+                        <div class="step-pipeline-item active" id="pipeStep1">
+                            <div class="step-pipeline-circle"><i class="fa-solid fa-user"></i></div>
+                            <div class="step-pipeline-label">1. Contact</div>
+                        </div>
+                        <div class="step-pipeline-item" id="pipeStep2">
+                            <div class="step-pipeline-circle"><i class="fa-solid fa-calendar-day"></i></div>
+                            <div class="step-pipeline-label">2. Schedule</div>
+                        </div>
+                        <div class="step-pipeline-item" id="pipeStep3">
+                            <div class="step-pipeline-circle"><i class="fa-solid fa-chair"></i></div>
+                            <div class="step-pipeline-label">3. AI Match</div>
+                        </div>
+                        <div class="step-pipeline-item" id="pipeStep4">
+                            <div class="step-pipeline-circle"><i class="fa-solid fa-check"></i></div>
+                            <div class="step-pipeline-label">4. Confirmed</div>
+                        </div>
+                    </div>
+
+                    <form id="custBookingForm">
+                        <div class="mb-3">
+                            <label class="form-label-saas"><i class="fa-regular fa-user me-1 text-primary"></i> Guest Name</label>
+                            <input type="text" id="resNameInput" class="form-control form-control-saas" value="David Sterling (Customer)" required placeholder="Your full name">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label-saas"><i class="fa-regular fa-envelope me-1 text-primary"></i> Email Address</label>
+                                <input type="email" id="resEmailInput" class="form-control form-control-saas" value="customer@restaurant.com" required placeholder="name@example.com">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label-saas"><i class="fa-solid fa-phone me-1 text-primary"></i> Phone Number</label>
+                                <input type="tel" id="resPhoneInput" class="form-control form-control-saas" value="+1 (555) 019-8833" required placeholder="+1 555-0100">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-4">
+                                <label class="form-label-saas"><i class="fa-solid fa-users me-1 text-warning"></i> Party Size</label>
+                                <input type="number" id="resGuestCount" class="form-control form-control-saas" value="2" min="1" max="14" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label-saas"><i class="fa-regular fa-calendar me-1 text-warning"></i> Date</label>
+                                <input type="date" id="resDate" class="form-control form-control-saas" value="2026-10-16" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label-saas"><i class="fa-regular fa-clock me-1 text-warning"></i> Time</label>
+                                <input type="time" id="resTime" class="form-control form-control-saas" value="19:30" required>
+                            </div>
+                        </div>
+
+                        <!-- Live Smart Allocation Preview Box -->
+                        <div class="mb-3">
+                            <label class="form-label-saas"><i class="fa-solid fa-wand-magic-sparkles me-1 text-success"></i> AI Seating Allocation Engine</label>
+                            <div id="smartTableRecommendation">
+                                <div class="p-3 rounded-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge bg-success text-white mb-1"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Smart Recommended Table</span>
+                                            <h6 class="text-white mb-0 fw-bold" id="recTableName">T-01 (Ground Floor Main)</h6>
+                                            <small class="text-muted" id="recTableDesc">Capacity: 2 seats &bull; Perfect Fit</small>
+                                        </div>
+                                        <span class="badge bg-dark border border-success text-success py-2 px-3">Best Fit</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-saas"><i class="fa-regular fa-comment-dots me-1 text-muted"></i> Occasion / Special Requests</label>
+                            <textarea id="resNotesInput" class="form-control form-control-saas" rows="2" placeholder="Anniversary dinner, terrace seating preference, high chair needed...">Window booth table for birthday celebration</textarea>
+                        </div>
+
+                        <!-- Live Data Verification Card -->
+                        <div class="p-3 rounded-3 mb-3" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.68rem; letter-spacing: 0.05em;">Instant Booking Data Summary</span>
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25" style="font-size:0.65rem;"><i class="fa-solid fa-shield-check me-1"></i> Live Validated</span>
+                            </div>
+                            <div class="row g-2 text-light" style="font-size: 0.78rem;">
+                                <div class="col-6"><i class="fa-solid fa-user-check text-warning me-1"></i> Guest: <span id="summaryGuest" class="fw-semibold text-white">David Sterling</span></div>
+                                <div class="col-6"><i class="fa-solid fa-phone text-warning me-1"></i> Phone: <span id="summaryPhone" class="fw-semibold text-white">+1 (555) 019-8833</span></div>
+                                <div class="col-6"><i class="fa-solid fa-users text-primary me-1"></i> Guests: <span id="summaryParty" class="fw-semibold text-white">2 Guests</span></div>
+                                <div class="col-6"><i class="fa-regular fa-calendar-check text-primary me-1"></i> Slot: <span id="summarySlot" class="fw-semibold text-white">Today @ 7:30 PM</span></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-saas w-100 py-3 fs-6 fw-bold" id="btnBookTable">
+                            <i class="fa-solid fa-calendar-check me-2"></i> Confirm Instant Reservation
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Live Scheduled Bookings -->
+            <div class="col-lg-6">
+                <div class="saas-card h-100">
+                    <div class="saas-card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="saas-card-title mb-0"><i class="fa-solid fa-calendar-days text-primary me-2"></i> Your Reservations</h5>
+                            <small class="text-muted">Past & upcoming dining reservations</small>
+                        </div>
+                        <span class="badge bg-dark border border-secondary border-opacity-25 text-muted" id="bookingCountBadge">
+                            2 Bookings
+                        </span>
+                    </div>
+                    <div class="saas-card-body p-0" id="bookingListContainer">
+                        <div class="list-group list-group-flush" id="bookingsList">
+                            <div class="list-group-item bg-transparent border-secondary border-opacity-25 px-4 py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-primary font-monospace">RES-8821B</span>
+                                    <span class="badge-status badge-confirmed">Confirmed</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-light small">
+                                    <span><i class="fa-regular fa-calendar me-1 text-warning"></i> Fri, Oct 16, 2026 at 7:30 PM</span>
+                                    <span><i class="fa-solid fa-users me-1 text-primary"></i> 2 Guests</span>
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fa-solid fa-chair me-1"></i> Allocated: T-01 (Ground Floor Main)
+                                </div>
+                            </div>
+                            <div class="list-group-item bg-transparent border-secondary border-opacity-25 px-4 py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-primary font-monospace">RES-E96D2</span>
+                                    <span class="badge-status badge-confirmed">Confirmed</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-light small">
+                                    <span><i class="fa-regular fa-calendar me-1 text-warning"></i> Fri, Oct 16, 2026 at 8:00 PM</span>
+                                    <span><i class="fa-solid fa-users me-1 text-primary"></i> 4 Guests</span>
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fa-solid fa-chair me-1"></i> Allocated: T-04 (Ground Floor Main)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Chef's Featured Dishes Showcase & Interactive Cart -->
+<section class="py-5" id="menuSection">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+            <div>
+                <span class="badge bg-primary text-white mb-2">Culinary Masterpieces</span>
+                <h2 class="h3 fw-bold text-white mb-0">Featured Signature Dishes</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary-saas cat-btn active" onclick="filterMenu('all', this)">All</button>
+                <button class="btn btn-sm btn-secondary-saas cat-btn" onclick="filterMenu('Mains', this)">Mains</button>
+                <button class="btn btn-sm btn-secondary-saas cat-btn" onclick="filterMenu('Pizza', this)">Pizza</button>
+                <button class="btn btn-sm btn-secondary-saas cat-btn" onclick="filterMenu('Desserts', this)">Desserts</button>
+            </div>
+        </div>
+
+        <div class="row g-4" id="menuGridContainer">
+            <!-- Dishes populated by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- 6 Role Workstations Showcase -->
+<section class="py-5" id="rolesSection" style="background: rgba(17, 24, 39, 0.4);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-warning text-dark fw-bold mb-2">Role-Based Access Control</span>
+            <h2 class="h3 fw-bold text-white mb-2">6 Dedicated Workstations</h2>
+            <p class="text-muted small">Explore each operational workstation designed specifically for restaurant workflows.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Admin -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('admin')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-warning text-dark fw-bold"><i class="fa-solid fa-crown me-1"></i> Administrator</span>
+                            <span class="text-muted small">Full Control</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Executive Dashboard</h4>
+                        <p class="text-muted small mb-3">Revenue analytics with Chart.js, menu catalog, recipe bill-of-materials, audit trails and user access.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Admin Suite</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waiter -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('waiter')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-success text-white fw-bold"><i class="fa-solid fa-utensils me-1"></i> Waitstaff</span>
+                            <span class="text-muted small">Floor Station</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Touch-Friendly POS</h4>
+                        <p class="text-muted small mb-3">Interactive floor plan, 1-click dish selection, table notes, promo coupons and runner alerts.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Waiter Station</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kitchen -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('kitchen')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-danger text-white fw-bold"><i class="fa-solid fa-fire-burner me-1"></i> Kitchen Brigade</span>
+                            <span class="text-muted small">Zero-Refresh</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Kitchen Display (KDS)</h4>
+                        <p class="text-muted small mb-3">Live streaming order Kanban: Pending &rarr; Preparing &rarr; Ready at Pass with audible chime notifications.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Kitchen Display</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cashier -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('cashier')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-primary text-white fw-bold"><i class="fa-solid fa-cash-register me-1"></i> Cashier</span>
+                            <span class="text-muted small">Checkout Desk</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Billing & Invoicing</h4>
+                        <p class="text-muted small mb-3">Unsettled checks, tip calculations, multiple tender types (Cash/Card/UPI), and printable receipts.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Billing Desk</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('manager')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-info text-dark fw-bold"><i class="fa-solid fa-user-tie me-1"></i> General Manager</span>
+                            <span class="text-muted small">Operations</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Manager Control</h4>
+                        <p class="text-muted small mb-3">Daily service checklist, staff roster, daily financial reconciliation, and inventory replenishment.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Manager Suite</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer -->
+            <div class="col-md-6 col-lg-4">
+                <div class="portal-card" onclick="openRoleModal('customer')">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-secondary text-light fw-bold"><i class="fa-solid fa-user me-1"></i> Diner Portal</span>
+                            <span class="text-muted small">Customer App</span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-2">Dining Experience</h4>
+                        <p class="text-muted small mb-3">Browse menu with dietary filters, book online tables with AI fit scoring, and track order status live.</p>
+                    </div>
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-primary fw-semibold small">
+                        <span>Inspect Diner Portal</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-4 border-top border-secondary border-opacity-25 text-center text-muted small" style="background: var(--bg-surface);">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+        <div>&copy; 2026 <strong class="text-light">Restaurant Pro Enterprise</strong> &mdash; Modern Restaurant Management Platform</div>
+        <div class="d-flex gap-3">
+            <a href="https://github.com/Dhanin12345/Restaurant-Management-System" target="_blank" class="text-muted hover-light"><i class="fa-brands fa-github me-1"></i> GitHub Repository</a>
+            <a href="#top" class="text-muted hover-light">Back to Top</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Floating Cart Drawer Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content modal-content-saas">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3">
+                <h5 class="modal-title fw-bold text-white mb-0"><i class="fa-solid fa-receipt text-warning me-2"></i> Current Check / Cart</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="cartItemsList" class="mb-3">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Subtotal</span>
+                        <span id="cartSubtotalText">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small mb-1">
+                        <span>Sales Tax (8.5%)</span>
+                        <span id="cartTaxText">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small mb-2" id="cartDiscountRow" style="display:none !important;">
+                        <span class="text-success">Promo Discount</span>
+                        <span class="text-success" id="cartDiscountText">-$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-white fw-bold fs-5 pt-2 border-top border-secondary border-opacity-25">
+                        <span>Total Due</span>
+                        <span class="text-primary" id="cartTotalText">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="input-group mb-3">
+                    <input type="text" id="couponCodeInput" class="form-control form-control-sm form-control-saas" placeholder="Promo code (WELCOME10)">
+                    <button class="btn btn-secondary-saas btn-sm px-3" type="button" onclick="applyPromo()">Apply</button>
+                </div>
+
+                <button type="button" class="btn btn-primary-saas w-100 py-3 fw-bold fs-6" id="btnPlaceOrder" onclick="checkoutOrder()">
+                    <i class="fa-solid fa-arrow-right me-2"></i> Send Ticket to Kitchen (KDS)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Success Modal -->
+<div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content modal-content-saas">
+            <div class="modal-body p-4 text-center">
+                <div class="success-icon-pulse mb-3">
+                    <i class="fa-solid fa-check text-success"></i>
+                </div>
+                <h4 class="fw-bold text-white mb-1">Order Sent to Kitchen!</h4>
+                <p class="text-muted small mb-4">Ticket transmitted to Kitchen brigade display and recipe stock calculated.</p>
+
+                <div class="order-detail-box text-start mb-4" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.25rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                        <span class="text-muted small">Ticket Reference</span>
+                        <span class="badge-order-number" id="successOrderRef" style="color:#f97316; font-family:var(--font-mono); font-weight:700;">ORD-8942</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">Total Charged</span>
+                        <span class="h5 fw-bold text-primary mb-0" id="successOrderTotal">$0.00</span>
+                    </div>
+                    <div class="pt-1 text-light small" style="font-size:0.8rem;">
+                        <div class="mb-2"><i class="fa-solid fa-circle-check text-success me-2"></i> Sent to Kitchen Display (KDS Live Queue)</div>
+                        <div class="mb-2"><i class="fa-solid fa-circle-check text-success me-2"></i> Recipe ingredients deducted from stock</div>
+                        <div><i class="fa-solid fa-circle-check text-success me-2"></i> Waitstaff food runner alerted</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary-saas px-4 fw-bold" data-bs-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reservation Success Modal -->
+<div class="modal fade" id="reservationSuccessModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content modal-content-saas">
+            <div class="modal-body p-4 text-center">
+                <div class="success-icon-pulse mb-3">
+                    <i class="fa-solid fa-calendar-check text-success"></i>
+                </div>
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1 mb-2">Instant Booking Verified</span>
+                <h4 class="fw-bold text-white mb-1">Reservation Confirmed!</h4>
+                <p class="text-muted small mb-4">Your dining table has been locked in our live seating allocation registry.</p>
+
+                <div class="order-detail-box text-start mb-4" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.25rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                        <span class="text-muted small">Confirmation Code</span>
+                        <span class="badge-order-number" id="resModalCode" style="font-size: 1rem; color: #f97316; font-family: var(--font-mono); font-weight: 700;">RES-00000</span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);">
+                                <small class="text-muted d-block" style="font-size: 0.7rem;">TABLE ASSIGNED</small>
+                                <span class="fw-bold text-white small" id="resModalTable"><i class="fa-solid fa-chair text-warning me-1"></i> T-01</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);">
+                                <small class="text-muted d-block" style="font-size: 0.7rem;">SCHEDULE</small>
+                                <span class="fw-bold text-white small" id="resModalSchedule"><i class="fa-regular fa-clock text-primary me-1"></i> Today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-1 text-light small" style="font-size: 0.8rem;">
+                        <div class="mb-2"><i class="fa-solid fa-circle-check text-success me-2"></i> Time-slot dining collision checked & passed</div>
+                        <div class="mb-2"><i class="fa-solid fa-circle-check text-success me-2"></i> Floor host station notified automatically</div>
+                        <div><i class="fa-solid fa-circle-check text-success me-2"></i> Audit log recorded in compliance journal</div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-secondary-saas px-4" data-bs-dismiss="modal">Close</button>
+                    <a href="#reservationSection" class="btn btn-primary-saas px-4 fw-bold" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-list-check me-1"></i> View My Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Details Modal -->
+<div class="modal fade" id="roleInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content modal-content-saas">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3">
+                <h5 class="modal-title fw-bold text-white mb-0" id="roleModalTitle">Role Workstation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="roleModalBody">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step-by-Step Workflow Player Modal -->
+<div class="modal fade workflow-player-modal" id="workflowPlayerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.3); display: flex; align-items: center; justify-content: center; color: #f97316;">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0">Step-by-Step Data Processing Flow</h5>
+                        <small class="text-muted">Live Interactive Architectural Simulation &middot; 5 Operational Phases</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-primary-saas fw-bold px-3" id="flowAutoPlayBtn">
+                        <i class="fa-solid fa-play me-1"></i> Auto-Play
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="stage-tracker-rail mb-4" id="stageTrackerRail"></div>
+
+                <div class="stage-display-card" id="stageDisplayCard">
+                    <div class="stage-progress-bar-wrap">
+                        <div class="stage-progress-bar-fill" id="stageProgressBarFill"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                        <div>
+                            <span class="badge bg-primary text-white mb-1" id="stageBadge">Phase 1 of 5</span>
+                            <h4 class="fw-bold text-white mb-1" id="stageTitle">Smart Table Allocation</h4>
+                            <p class="text-muted small mb-0" id="stageDescription">Description goes here</p>
+                        </div>
+                        <div id="stageDbPill" class="db-live-state-pill">
+                            <i class="fa-solid fa-database text-warning"></i> <span>TABLES: Available &rarr; Reserved</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-3 mb-3" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.68rem; letter-spacing:0.05em;">What The User / Staff Sees</small>
+                                <div class="text-light small" id="stageUiAction">UI Action</div>
+                            </div>
+                            <div class="col-md-6 border-start border-secondary border-opacity-25 ps-md-3">
+                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.68rem; letter-spacing:0.05em;">Data Engine Execution (PHP + PDO + MySQL)</small>
+                                <div class="font-monospace text-warning small" style="font-size:0.75rem;" id="stageDbAction">SQL Execution</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-4" id="stageMetricsRow"></div>
+
+                    <div class="flow-control-bar">
+                        <button type="button" class="btn btn-secondary-saas btn-sm px-3" id="flowPrevBtn">
+                            <i class="fa-solid fa-chevron-left me-1"></i> Previous Step
+                        </button>
+                        <button type="button" class="btn btn-primary-saas btn-sm px-3 fw-bold" id="flowNextBtn">
+                            Next Step <i class="fa-solid fa-chevron-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Interactive Frontend Logic for Netlify & Live Browsers -->
+<script>
+const dishesData = [
+    { id: 1, name: 'Truffle Mushroom Risotto', category: 'Mains', price: 22.50, prep: 18, img: 'risotto.jpg', desc: 'Creamy Arborio rice with black winter truffle and aged parmesan.' },
+    { id: 2, name: 'Wood-Fired Margherita', category: 'Pizza', price: 16.00, prep: 12, img: 'margherita.jpg', desc: 'San Marzano tomato sauce, fresh mozzarella di bufala, and basil.' },
+    { id: 3, name: 'USDA Prime Ribeye Steak', category: 'Mains', price: 38.00, prep: 22, img: 'ribeye.jpg', desc: 'Dry-aged 14oz ribeye served with truffle butter and charred asparagus.' },
+    { id: 4, name: 'Pan-Seared Atlantic Salmon', category: 'Mains', price: 28.50, prep: 16, img: 'salmon.jpg', desc: 'Crispy skin salmon with lemon dill emulsion and sautéed broccolini.' },
+    { id: 5, name: 'Classic Italian Tiramisu', category: 'Desserts', price: 9.50, prep: 6, img: 'tiramisu.jpg', desc: 'Espresso-soaked ladyfingers with silky mascarpone and cocoa dusting.' },
+    { id: 6, name: 'Gourmet Angus Truffle Burger', category: 'Mains', price: 19.00, prep: 14, img: 'truffle_burger.jpg', desc: 'Brioche bun, melted smoked gouda, arugula, and truffle aioli.' },
+    { id: 7, name: 'Crispy Calamari Fritti', category: 'Starters', price: 13.50, prep: 10, img: 'calamari.jpg', desc: 'Tender calamari rings with spicy marinara and garlic aioli.' },
+    { id: 8, name: 'Passion Fruit Spritz', category: 'Cocktails', price: 7.50, prep: 4, img: 'passion_spritz.jpg', desc: 'Prosecco, passion fruit liqueur, and fresh mint.' }
+];
+
+let cart = [
+    { id: 1, name: 'Truffle Mushroom Risotto', price: 22.50, qty: 1 },
+    { id: 2, name: 'Wood-Fired Margherita', price: 16.00, qty: 1 }
+];
+let discount = 0;
+
+function renderMenu(items) {
+    const container = document.getElementById('menuGridContainer');
+    if (!container) return;
+    container.innerHTML = items.map(d => `
+        <div class="col-md-6 col-lg-4">
+            <div class="saas-card h-100 p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="food-card-img-wrap">
+                        <img src="assets/images/${d.img}" alt="${d.name}" class="food-card-img" onerror="this.src='assets/images/default_food.png'">
+                        <span class="price-floating-badge">$${d.price.toFixed(2)}</span>
+                        <span class="category-floating-badge"><i class="fa-solid fa-utensils"></i> ${d.category}</span>
+                    </div>
+                    <h5 class="text-white fw-bold mb-2">${d.name}</h5>
+                    <p class="food-card-desc mb-3">${d.desc}</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-10">
+                    <span class="text-light small fw-semibold"><i class="fa-regular fa-clock me-1 text-warning"></i> ${d.prep} mins prep</span>
+                    <button class="btn btn-sm btn-primary-saas px-3" onclick="addToCart(${d.id})">
+                        <i class="fa-solid fa-plus me-1"></i> Add to Check
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterMenu(cat, btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.replace('btn-primary-saas', 'btn-secondary-saas'));
+    if (btn) btn.classList.replace('btn-secondary-saas', 'btn-primary-saas');
+    if (cat === 'all') renderMenu(dishesData);
+    else renderMenu(dishesData.filter(d => d.category.toLowerCase().includes(cat.toLowerCase())));
+}
+
+function addToCart(id) {
+    const dish = dishesData.find(d => d.id === id);
+    if (!dish) return;
+    const existing = cart.find(c => c.id === id);
+    if (existing) existing.qty++;
+    else cart.push({ id: dish.id, name: dish.name, price: dish.price, qty: 1 });
+    updateCartUI();
+    const modalEl = document.getElementById('cartModal');
+    if (modalEl) new bootstrap.Modal(modalEl).show();
+}
+
+function updateCartQty(id, delta) {
+    const item = cart.find(c => c.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    const tax = subtotal * 0.085;
+    const total = Math.max(0, subtotal - discount) + tax;
+
+    document.getElementById('navCartCount').textContent = count;
+    document.getElementById('cartSubtotalText').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('cartTaxText').textContent = `$${tax.toFixed(2)}`;
+    document.getElementById('cartTotalText').textContent = `$${total.toFixed(2)}`;
+
+    const discRow = document.getElementById('cartDiscountRow');
+    if (discount > 0) {
+        discRow.style.setProperty('display', 'flex', 'important');
+        document.getElementById('cartDiscountText').textContent = `-$${discount.toFixed(2)}`;
+    } else {
+        discRow.style.setProperty('display', 'none', 'important');
+    }
+
+    const list = document.getElementById('cartItemsList');
+    if (!list) return;
+    if (cart.length === 0) {
+        list.innerHTML = `<div class="p-4 text-center text-muted small"><i class="fa-solid fa-basket-shopping fa-2x mb-2 opacity-50"></i><p class="mb-0">Your check is empty. Add dishes from the menu!</p></div>`;
+        document.getElementById('btnPlaceOrder').disabled = true;
+    } else {
+        document.getElementById('btnPlaceOrder').disabled = false;
+        list.innerHTML = cart.map(item => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-25">
+                <div>
+                    <h6 class="text-white small fw-bold mb-0">${item.name}</h6>
+                    <small class="text-muted">$${item.price.toFixed(2)} each</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-secondary-saas py-0 px-2" onclick="updateCartQty(${item.id}, -1)">-</button>
+                    <span class="text-white fw-bold small">${item.qty}</span>
+                    <button class="btn btn-sm btn-secondary-saas py-0 px-2" onclick="updateCartQty(${item.id}, 1)">+</button>
+                    <span class="text-primary fw-bold small ms-2">$${(item.price * item.qty).toFixed(2)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function applyPromo() {
+    const code = document.getElementById('couponCodeInput')?.value.trim().toUpperCase();
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    if (code === 'WELCOME10') {
+        discount = subtotal * 0.10;
+        alert('Promo WELCOME10 applied! 10% discount subtracted.');
+    } else if (code === 'FLAT5OFF') {
+        discount = 5.00;
+        alert('Promo FLAT5OFF applied! $5 discount subtracted.');
+    } else {
+        alert('Please enter a valid coupon code (e.g. WELCOME10 or FLAT5OFF).');
+    }
+    updateCartUI();
+}
+
+function checkoutOrder() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    const total = Math.max(0, subtotal - discount) + (subtotal * 0.085);
+    const ref = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+
+    bootstrap.Modal.getInstance(document.getElementById('cartModal')).hide();
+    document.getElementById('successOrderRef').textContent = ref;
+    document.getElementById('successOrderTotal').textContent = `$${total.toFixed(2)}`;
+    
+    cart = [];
+    discount = 0;
+    updateCartUI();
+
+    new bootstrap.Modal(document.getElementById('orderSuccessModal')).show();
+}
+
+// Reservation Step-by-Step Logic
+document.addEventListener('DOMContentLoaded', function() {
+    renderMenu(dishesData);
+    updateCartUI();
+
+    const nameIn = document.getElementById('resNameInput');
+    const phoneIn = document.getElementById('resPhoneInput');
+    const guestIn = document.getElementById('resGuestCount');
+    const dateIn = document.getElementById('resDate');
+    const timeIn = document.getElementById('resTime');
+
+    function updateResSummary() {
+        if (nameIn) document.getElementById('summaryGuest').textContent = nameIn.value || 'Guest';
+        if (phoneIn) document.getElementById('summaryPhone').textContent = phoneIn.value || 'Enter phone';
+        if (guestIn) {
+            document.getElementById('summaryParty').textContent = `${guestIn.value} Guests`;
+            const party = parseInt(guestIn.value);
+            const recName = document.getElementById('recTableName');
+            const recDesc = document.getElementById('recTableDesc');
+            if (party <= 2) {
+                recName.textContent = 'T-01 (Ground Floor Main)';
+                recDesc.textContent = `Capacity: 2 seats • Perfect Fit`;
+            } else if (party <= 4) {
+                recName.textContent = 'T-04 (Ground Floor Main)';
+                recDesc.textContent = `Capacity: 4 seats • Best Fit (${4 - party} extra seats)`;
+            } else {
+                recName.textContent = 'T-08 (VIP Private Dining)';
+                recDesc.textContent = `Capacity: 8 seats • Banquet Fit`;
+            }
+        }
+        if (dateIn && timeIn) {
+            document.getElementById('summarySlot').textContent = `${dateIn.value} @ ${timeIn.value}`;
+        }
+    }
+
+    [nameIn, phoneIn, guestIn, dateIn, timeIn].forEach(el => {
+        if (el) el.addEventListener('input', updateResSummary);
+    });
+
+    document.getElementById('custBookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnBookTable');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> [1/3] Checking availability...';
+
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-spin me-2"></i> [2/3] Locking optimal table...';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check me-2"></i> [3/3] Confirmed!';
+                const code = 'RES-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+                document.getElementById('resModalCode').textContent = code;
+                document.getElementById('resModalTable').textContent = document.getElementById('recTableName').textContent;
+                document.getElementById('resModalSchedule').textContent = `${dateIn.value} at ${timeIn.value}`;
+
+                new bootstrap.Modal(document.getElementById('reservationSuccessModal')).show();
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-calendar-check me-2"></i> Confirm Instant Reservation';
+            }, 600);
+        }, 500);
+    });
+});
+
+function openRoleModal(role) {
+    const modalEl = document.getElementById('roleInfoModal');
+    const title = document.getElementById('roleModalTitle');
+    const body = document.getElementById('roleModalBody');
+
+    const rolesData = {
+        admin: {
+            title: 'Administrator Workstation',
+            icon: 'fa-crown text-warning',
+            cred: 'admin@restaurant.com / Admin@123',
+            items: ['Executive Financial Dashboard (KPIs, revenue charts)', 'Menu & Recipe BOM Builder (auto ingredient deduction)', 'User & Staff Management (Role-Based Access Control)', 'Audit Logs & System Configuration']
+        },
+        manager: {
+            title: 'General Manager Suite',
+            icon: 'fa-user-tie text-info',
+            cred: 'manager@restaurant.com / Manager@123',
+            items: ['Daily Shift Operations & Opening Checklist', 'Live Order Flow Monitoring & Food Runner Alerts', 'Inventory Health & Automatic Stock Reorder Levels', 'Staff Roster & Financial End-of-Day Reconciliation']
+        },
+        waiter: {
+            title: 'Waitstaff Floor Station & POS',
+            icon: 'fa-utensils text-success',
+            cred: 'waiter@restaurant.com / Waiter@123',
+            items: ['Interactive Floorplan Tables (Available, Occupied, Reserved)', 'High-Speed Touch POS Cart with Modifiers & Special Notes', 'Discount Coupons (WELCOME10, FLAT5OFF)', 'Real-Time Food Runner Pickup Alerts']
+        },
+        kitchen: {
+            title: 'Kitchen Display Brigade (KDS)',
+            icon: 'fa-fire-burner text-danger',
+            cred: 'kitchen@restaurant.com / Kitchen@123',
+            items: ['Zero-Refresh Streaming Order Board', 'Color-Coded Urgent Preparation Timers', 'HTML5 Web Audio Chime Alerts on New Orders', 'Kanban Stage Progression: Pending ➔ Preparing ➔ Ready']
+        },
+        cashier: {
+            title: 'Cashier Checkout & Billing Desk',
+            icon: 'fa-cash-register text-primary',
+            cred: 'cashier@restaurant.com / Cashier@123',
+            items: ['Unsettled Checks Ledger', 'Split Checks & Automatic Tip Calculator', 'Multiple Tenders (Cash, Credit Card, UPI, Gift Card)', 'Printable Customer Receipts & Table Auto-Freeing']
+        },
+        customer: {
+            title: 'Customer Dining & Reservation Portal',
+            icon: 'fa-user text-secondary',
+            cred: 'customer@restaurant.com / Customer@123',
+            items: ['Interactive Digital Menu with Real-Time Pricing', 'Smart Table Allocation with Capacity Fit & Conflict Detection', 'Instant Table Reservation Voucher & Code Generation', 'Live Order Status Tracker']
+        }
+    };
+
+    const r = rolesData[role] || rolesData.customer;
+    title.innerHTML = `<i class="fa-solid ${r.icon} me-2"></i> ${r.title}`;
+    body.innerHTML = `
+        <div class="p-3 rounded-3 mb-3" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.68rem;">Test Account Credentials</small>
+            <div class="font-monospace text-warning fw-bold small">${r.cred}</div>
+        </div>
+        <h6 class="text-white fw-bold mb-2 small text-uppercase">Core Features & Architecture</h6>
+        <ul class="text-light small ps-3 mb-4" style="line-height: 1.8;">
+            ${r.items.map(i => `<li>${i}</li>`).join('')}
+        </ul>
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+            <span class="text-muted small">Full PHP/MySQL source in GitHub repo</span>
+            <button type="button" class="btn btn-secondary-saas btn-sm px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+    `;
+    new bootstrap.Modal(modalEl).show();
+}
+</script>
+
+<script src="assets/js/workflow_player.js"></script>
+</body>
+</html>
